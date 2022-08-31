@@ -1,0 +1,85 @@
+* Group 4
+* Gaurav Madkaikar - 19CS30018
+* Girish Kumar - 19CS30019
+
++++++++++++++++++++++++++++++++ DOCUMENTATION +++++++++++++++++++++++++++++++
+
+Test string: "You must be the change you wish to see in the world"
+Actual length of the string: 51
+
+TABLE on Probability v/s Number of transmissions:
+    _____________________________________________________________________
+    |  Probability  |  Number of transmissions  |   Transmission Ratio  |
+    |_______________|___________________________|_______________________|  
+    |     0.05      |            53             |   (53 / 51) = 1.039   | 
+    ---------------------------------------------------------------------
+    |     0.10      |            59             |   (59 / 51) = 1.157   |
+    ---------------------------------------------------------------------
+    |     0.15      |            71             |   (71 / 51) = 1.392   |
+    ---------------------------------------------------------------------
+    |     0.20      |            78             |   (78 / 51) = 1.529   |        
+    ---------------------------------------------------------------------
+    |     0.25      |            85             |   (85 / 51) = 1.667   |    
+    ---------------------------------------------------------------------
+    |     0.30      |            98             |   (98 / 51) = 1.922   |        
+    ---------------------------------------------------------------------
+    |     0.35      |            104            |   (104 / 51) = 2.039  |    
+    ---------------------------------------------------------------------
+    |     0.40      |            126            |   (126 / 51) = 2.471  |        
+    ---------------------------------------------------------------------
+    |     0.45      |            160            |   (160 / 51) = 3.137  |     
+    ---------------------------------------------------------------------
+    |     0.50      |            175            |   (175 / 51) = 3.431  |    
+    ---------------------------------------------------------------------
+_______________________________________________________________
+__________________DATA STRUCTURES & VARIABLES__________________
+
+1) UNACKNOWLEDGED MESSAGE TABLE (UMT)
+    typedef struct unacknowledged_message_table
+    {
+        int id;                             --> Message ID (1-based indexing)
+        char buffer[MSG_SIZE];              --> Data buffer of max. size 100
+        size_t buffer_len;                  --> Actual length of the buffer
+        time_t time;                        --> Time of entry
+        int flag;                           --> Flag for send/receive
+        struct sockaddr_in dest_addr;       --> Destination address (IP and Port)
+        socklen_t dest_addr_len;            --> Size of dest_addr
+    } unackMsgTable;
+
+2) RECEIVED MESSAGE TABLE (RMT)
+   typedef struct received_message_table
+    {
+        int id;                             --> Message ID (1-based indexing)
+        char buffer[MSG_SIZE];              --> Data buffer of max. size 100
+        struct sockaddr_in sender_addr;     --> Store sender's address (IP and Port)
+        socklen_t addr_len;                 --> Size of sender_addr
+    } recvMsgTable;
+
+* Pointers corresponding to each of these tables have been declared globally in rsocket.h and have been dynamically allocated in r_socket()
+* Both the tables are implemented as dynamic lists
+
+---- Global Variables ----
+* numTransmissions - Store the total number of transmissions required to send each character exactly once
+* dataRecv - Store the number of received messages in the received_message_table (RMT)
+* msgSequence - Message ID corresponding to each message
+
+---- Helper Methods ----
+* int deleteAckMsg(int id) - Remove message with a given msgID from UMT after it is acknowledeged
+* void addSequenceNum(char *buf, int __id, int __len) - Add msgID to each data message contained in buf
+* ssize_t sendACKMsg(int __id, struct sockaddr_in __addr, socklen_t __addr_len) - Send acknowledgement to the sender
+* void getMessageID(int *__id, char *buf, int __len) - Retrieve the message ID from the input data buffer 
+* int addDataMsg(int __id, char *buf, struct sockaddr_in __addr, socklen_t __addr_len) - Add the message to the RMT if it is a data message
+* void reTransmitMsg(int expiredId) - Re-transmit timed-out messages
+* void deleteRMTEntry(int msgId) 
+
+---------------------- Steps to run the code ----------------------
+--> make run - Compile the files to generate executables: user1 & user2
+             - Run these executable files (./user1 & ./user2) concurrently
+--> make clean - Remove all additional files
+_______________________________________________
+________________IMPORTANT NOTE_________________
+    * Each character is displayed on a newline in user2 atleast once
+    * The correspondiing status of each character is displayed in user1
+    * Finally, the total number of transmissions required to transmit each character is displayed in user1
+    * Run the executable files again for checking some other input
+    * Try p = 0, for transmitting data uninterruptedly
